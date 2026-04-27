@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --surface: #131929;
+      --border: rgba(255, 255, 255, 0.07);
+      --accent: #4fc3f7;
+      --accent2: #81d4fa;
+      --text: #e8eaf6;
+      --muted: #7986a3;
+      --error: #ef9a9a;
+      --radius: 16px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -20%, rgba(79, 195, 247, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 90% 80%, rgba(129, 212, 250, 0.06) 0%, transparent 60%);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #e0f7fa, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+      font-weight: 300;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--muted);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.15);
+    }
+
+    button {
+      background: var(--accent);
+      color: #0b0f1a;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: var(--accent2);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result {
+      margin-top: 1.75rem;
+      animation: fadeUp 0.4s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .error-msg {
+      background: rgba(239, 154, 154, 0.1);
+      border: 1px solid rgba(239, 154, 154, 0.25);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      color: var(--error);
+      font-size: 0.95rem;
+    }
+
+    .weather-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .emoji {
+      font-size: 3.5rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 12px rgba(79, 195, 247, 0.3));
+    }
+
+    .city-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .description {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 0.1rem;
+    }
+
+    .temp-display {
+      font-family: 'Syne', sans-serif;
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .temp-display span {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.25rem 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .spinner {
+      display: flex;
+      justify-content: center;
+      padding: 2rem 0 1rem;
+    }
+
+    .spinner::after {
+      content: '';
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(79, 195, 247, 0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .temp-align {
+      margin-left: auto;
+      text-align: right;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Weather</h1>
+    <p>Real-time conditions for any city</p>
+  </header>
+
+  <div class="card">
+    <div class="search-row">
+      <input type="text" id="city-input" placeholder="Enter city name…" autocomplete="off" />
+      <button id="search-btn" onclick="fetchWeather()">Search</button>
+    </div>
+
+    <div id="spinner" class="spinner hidden"></div>
+
+    <div id="result" class="result hidden">
+      <div id="error-box" class="error-msg hidden"></div>
+
+      <div id="weather-box" class="hidden">
+        <div class="weather-main">
+          <div>
+            <div class="emoji" id="w-emoji"></div>
+          </div>
+          <div>
+            <div class="city-name" id="w-city"></div>
+            <div class="description" id="w-desc"></div>
+          </div>
+          <div class="temp-align">
+            <div class="temp-display"><span id="w-temp"></span><span>°C</span></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Feels Like</div>
+            <div class="stat-value"><span id="w-feels"></span>°C</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Humidity</div>
+            <div class="stat-value"><span id="w-humidity"></span>%</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Wind</div>
+            <div class="stat-value"><span id="w-wind"></span> m/s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById("city-input");
+    input.addEventListener("keydown", e => { if (e.key === "Enter") fetchWeather(); });
+
+    async function fetchWeather() {
+      const city = input.value.trim();
+      if (!city) return;
+
+      const btn = document.getElementById("search-btn");
+      const spinner = document.getElementById("spinner");
+      const result = document.getElementById("result");
+      const errorBox = document.getElementById("error-box");
+      const weatherBox = document.getElementById("weather-box");
+
+      btn.disabled = true;
+      spinner.classList.remove("hidden");
+      result.classList.add("hidden");
+      errorBox.classList.add("hidden");
+      weatherBox.classList.add("hidden");
+
+      try {
+        const res = await fetch(`/weather?city=${encodeURIComponent(city)}`);
+        const data = await res.json();
+
+        spinner.classList.add("hidden");
+        result.classList.remove("hidden");
+
+        if (!res.ok) {
+          errorBox.textContent = data.error || "An unknown error occurred.";
+          errorBox.classList.remove("hidden");
+        } else {
+          document.getElementById("w-emoji").textContent = data.emoji;
+          document.getElementById("w-city").textContent = `${data.city}, ${data.country}`;
+          document.getElementById("w-desc").textContent = data.description;
+          document.getElementById("w-temp").textContent = data.temperature;
+          document.getElementById("w-feels").textContent = data.feels_like;
+          document.getElementById("w-humidity").textContent = data.humidity;
+          document.getElementById("w-wind").textContent = data.wind_speed;
+          weatherBox.classList.remove("hidden");
+        }
+      } catch {
+        spinner.classList.add("hidden");
+        result.classList.remove("hidden");
+        errorBox.textContent = "Network error — could not reach the server.";
+        errorBox.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>
